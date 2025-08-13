@@ -13,10 +13,15 @@ const store = configureStore({
     ui: uiSlice.reducer,
     [api.reducerPath]: api.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false })
-      .concat(api.middleware)
-      .concat(createLogger()),
+  middleware: (getDefaultMiddleware) => {
+    const base = getDefaultMiddleware({ serializableCheck: false }).concat(
+      api.middleware
+    );
+    if (import.meta.env.DEV) {
+      return base.concat(createLogger());
+    }
+    return base;
+  },
 });
 
 export default store;

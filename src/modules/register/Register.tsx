@@ -27,7 +27,7 @@ const Register = () => {
     try {
       setAuthLoading(true);
       await registerMutation({ name: email.split('@')[0], email, password }).unwrap();
-      toast.success('Kayıt başarılı');
+      toast.success(t('login.messages.registerSuccess'));
       navigate('/login');
     } catch (error: any) {
       toast.error(error.message || 'Failed');

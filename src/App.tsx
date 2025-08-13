@@ -16,6 +16,9 @@ import Dashboard from '@pages/Dashboard';
 import Blank from '@pages/Blank';
 import SubMenu from '@pages/SubMenu';
 import Profile from '@pages/profile/Profile';
+import PeopleList from '@pages/people/PeopleList';
+import PeopleDetail from '@pages/people/PeopleDetail';
+import PeopleForm from '@pages/people/PeopleForm';
 
 import PublicRoute from './routes/PublicRoute';
 import PrivateRoute from './routes/PrivateRoute';
@@ -38,7 +41,7 @@ const App = () => {
   const { error: meError } = useMeQuery(undefined, { skip: false });
   useEffect(() => {
     if (meError) {
-      toast.info('Oturum doğrulanamadı. Lütfen tekrar giriş yapın.');
+      toast.info('login.messages.sessionInvalid');
       dispatch(clearCredentials());
     }
   }, [meError]);
@@ -108,6 +111,10 @@ const App = () => {
             <Route path="/sub-menu-1" element={<SubMenu />} />
             <Route path="/blank" element={<Blank />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/people" element={<PeopleList />} />
+            <Route path="/people/new" element={<PeopleForm />} />
+            <Route path="/people/:id" element={<PeopleDetail />} />
+            <Route path="/people/:id/edit" element={<PeopleForm />} />
             <Route path="/" element={<Dashboard />} />
           </Route>
         </Route>

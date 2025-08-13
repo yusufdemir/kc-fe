@@ -31,10 +31,10 @@ const Login = () => {
       if ((res as any).status === 'pending_2fa') {
         const { challenge_id, ttl } = res as any;
         dispatch(setTwoFA({ pending: true, challengeId: challenge_id, ttl }));
-        toast.info('2FA doğrulama gerekli');
+        toast.info(t('login.messages.twoFARequired'));
         navigate('/2fa-verify');
       } else {
-        toast.success('Giriş başarılı');
+        toast.success(t('login.messages.loginSuccess'));
         navigate('/');
       }
     } catch (error: any) {

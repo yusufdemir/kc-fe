@@ -16,6 +16,12 @@
         "social": "{{what}} kullanarak üye ol"
       },
       "signOut": "Çıkış Yap"
+    },
+    "messages": {
+      "sessionInvalid": "Oturum doğrulanamadı. Lütfen tekrar giriş yapın.",
+      "twoFARequired": "2FA doğrulama gerekli",
+      "loginSuccess": "Giriş başarılı",
+      "registerSuccess": "Kayıt başarılı"
     }
   },
   "register": {

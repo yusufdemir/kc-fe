@@ -41,6 +41,11 @@ export const MENU: IMenuItem[] = [
       },
     ],
   },
+  {
+    name: 'Kişiler',
+    icon: 'fas fa-users nav-icon',
+    path: '/people',
+  },
 ];
 
 const StyledBrandImage = styled(Image)`
@@ -57,7 +62,7 @@ const StyledUserImage = styled(Image)`
 `;
 
 const MenuSidebar = () => {
-  const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const user = useAppSelector((state) => state.auth.user);
   const sidebarSkin = useAppSelector((state) => state.ui.sidebarSkin);
   const menuItemFlat = useAppSelector((state) => state.ui.menuItemFlat);
   const menuChildIndent = useAppSelector((state) => state.ui.menuChildIndent);
@@ -77,19 +82,10 @@ const MenuSidebar = () => {
       <div className="sidebar">
         <div className="user-panel mt-3 pb-3 mb-3 d-flex">
           <div className="image">
-            <StyledUserImage
-              src={currentUser?.photoURL}
-              fallbackSrc="/img/default-profile.png"
-              alt="User"
-              width={34}
-              height={34}
-              rounded
-            />
+            <StyledUserImage fallbackSrc="/img/default-profile.png" alt="User" width={34} height={34} rounded />
           </div>
           <div className="info">
-            <Link to={'/profile'} className="d-block">
-              {currentUser?.email}
-            </Link>
+            <Link to={'/profile'} className="d-block">{user?.email}</Link>
           </div>
         </div>
 

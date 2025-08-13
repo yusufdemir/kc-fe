@@ -60,7 +60,9 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (status === 401 && originalRequest && !originalRequest._retry && !originalRequest.url?.includes('/v1/auth/login')) {
+    const url = originalRequest?.url || '';
+    const isAuthPath = url.includes('/v1/auth/login') || url.includes('/v1/auth/refresh') || url.includes('/v1/auth/logout');
+    if (status === 401 && originalRequest && !originalRequest._retry && !isAuthPath) {
       originalRequest._retry = true;
 
       if (isRefreshing) {

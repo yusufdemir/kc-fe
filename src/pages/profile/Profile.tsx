@@ -22,7 +22,7 @@ export const TabButton = styled(RawButton)`
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('ACTIVITY');
   const [t] = useTranslation();
-  const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const user = useAppSelector((state) => state.auth.user);
 
   const toggle = (tab: string) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -38,18 +38,9 @@ const Profile = () => {
               <div className="card card-primary card-outline">
                 <div className="card-body box-profile">
                   <div className="text-center">
-                    <StyledUserImage
-                      width={100}
-                      height={100}
-                      rounded
-                      src={currentUser?.photoURL}
-                      fallbackSrc="/img/default-profile.png"
-                      alt="User profile"
-                    />
+                    <StyledUserImage width={100} height={100} rounded fallbackSrc="/img/default-profile.png" alt="User profile" />
                   </div>
-                  <h3 className="profile-username text-center">
-                    {currentUser?.displayName}
-                  </h3>
+                  <h3 className="profile-username text-center">{user?.name || user?.email}</h3>
                   <p className="text-muted text-center">Software Engineer</p>
                   <ul className="list-group list-group-unbordered mb-3">
                     <li className="list-group-item">
