@@ -6,6 +6,7 @@ import { useCreatePersonMutation, useGetPersonQuery, useUpdatePersonMutation } f
 import type { PersonStoreRequest, PersonUpdateRequest } from '@app/types/people';
 import { toast } from 'react-toastify';
 import ContentHeader from '@app/components/content-header/ContentHeader';
+import { useGetCountriesQuery, useGetStatesQuery, useGetCitiesQuery, useGetCurrenciesQuery } from '@app/store/services/worldApi';
 
 const schema = Yup.object({
   first_name: Yup.string().required('Gerekli'),
@@ -76,7 +77,18 @@ const PeopleForm = () => {
     }
   }, [isEdit, data?.data]);
 
-  const { values, handleChange, handleSubmit, touched, errors } = formik;
+  const { values, handleChange, handleSubmit, touched, errors, setFieldValue } = formik;
+
+  const { data: countriesData } = useGetCountriesQuery();
+  const { data: statesData, isFetching: loadingStates } = useGetStatesQuery((values.country_id as number) || 0, {
+    skip: !values.country_id,
+  });
+  const { data: citiesData, isFetching: loadingCities } = useGetCitiesQuery((values.state_id as number) || 0, {
+    skip: !values.state_id,
+  });
+  const { data: currenciesData, isFetching: loadingCurrencies } = useGetCurrenciesQuery(
+    values.country_id ? { country_id: values.country_id as number } : undefined
+  );
 
   return (
     <>
@@ -115,20 +127,74 @@ const PeopleForm = () => {
                   {touched.citizenship_no && errors.citizenship_no && <div className="text-danger">{errors.citizenship_no as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
-                  <label>Ülke ID</label>
-                  <input name="country_id" type="number" className="form-control" value={values.country_id as any} onChange={handleChange} />
+                  <label>Ülke</label>
+                  <select
+                    name="country_id"
+                    className="form-control"
+                    value={values.country_id as any}
+                    onChange={(e) => {
+                      const n = e.target.value ? Number(e.target.value) : 0;
+                      setFieldValue('country_id', n);
+                      setFieldValue('state_id', null);
+                      setFieldValue('city_id', null);
+                      setFieldValue('currency_id', null);
+                    }}
+                  >
+                    <option value={0}>Seçiniz</option>
+                    {countriesData?.data?.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {touched.country_id && errors.country_id && <div className="text-danger">{errors.country_id as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
-                  <label>Eyalet ID</label>
-                  <input name="state_id" type="number" className="form-control" value={(values.state_id as any) ?? ''} onChange={handleChange} />
+                  <label>Eyalet</label>
+                  <select
+                    name="state_id"
+                    className="form-control"
+                    value={(values.state_id as any) ?? ''}
+                    onChange={(e) => {
+                      const n = e.target.value ? Number(e.target.value) : null;
+                      setFieldValue('state_id', n);
+                      setFieldValue('city_id', null);
+                    }}
+                    disabled={!values.country_id || loadingStates}
+                  >
+                    <option value="">Seçiniz</option>
+                    {statesData?.data?.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group col-md-6">
-                  <label>Şehir ID</label>
-                  <input name="city_id" type="number" className="form-control" value={(values.city_id as any) ?? ''} onChange={handleChange} />
+                  <label>Şehir</label>
+                  <select
+                    name="city_id"
+                    className="form-control"
+                    value={(values.city_id as any) ?? ''}
+                    onChange={(e) => setFieldValue('city_id', e.target.value ? Number(e.target.value) : null)}
+                    disabled={!values.state_id || loadingCities}
+                  >
+                    <option value="">Seçiniz</option>
+                    {citiesData?.data?.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group col-md-6">
-                  <label>Para Birimi ID</label>
-                  <input name="currency_id" type="number" className="form-control" value={(values.currency_id as any) ?? ''} onChange={handleChange} />
+                  <label>Para Birimi</label>
+                  <select
+                    name="currency_id"
+                    className="form-control"
+                    value={(values.currency_id as any) ?? ''}
+                    onChange={(e) => setFieldValue('currency_id', e.target.value ? Number(e.target.value) : null)}
+                    disabled={loadingCurrencies}
+                  >
+                    <option value="">Seçiniz</option>
+                    {currenciesData?.data?.map((cur) => (
+                      <option key={cur.id} value={cur.id}>{cur.code} - {cur.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <button className="btn btn-primary" type="submit" disabled={creating || updating}>

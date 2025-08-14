@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ContentHeader from '@app/components/content-header/ContentHeader';
 import { OverlayLoading } from '@app/components/OverlayLoading';
+import { useGetCountriesQuery, useGetStatesQuery, useGetCitiesQuery, useGetCurrenciesQuery } from '@app/store/services/worldApi';
 
 const PeopleList = () => {
   // q devre dışı
@@ -40,6 +41,13 @@ const PeopleList = () => {
     refetchOnFocus: false,
     refetchOnReconnect: false,
   });
+
+  const { data: countriesData, isFetching: loadingCountries } = useGetCountriesQuery();
+  const { data: statesData, isFetching: loadingStates } = useGetStatesQuery(countryId ?? 0, { skip: !countryId });
+  const { data: citiesData, isFetching: loadingCities } = useGetCitiesQuery(stateId ?? 0, { skip: !stateId });
+  const { data: currenciesData, isFetching: loadingCurrencies } = useGetCurrenciesQuery(
+    countryId ? { country_id: countryId } : undefined
+  );
 
   // Debounced auto search
   useEffect(() => {
@@ -151,14 +159,52 @@ const PeopleList = () => {
                     <label className="small text-muted">TC</label>
                     <input className="form-control form-control-sm" value={citizenshipNo} onChange={(e) => setCitizenshipNo(e.target.value)} />
                   </div>
-                  <div className="col-md-4 mb-2">
-                    <label className="small text-muted d-block">Konum</label>
-                    <div className="d-flex">
-                      <input className="form-control form-control-sm mr-1" placeholder="Ülke ID" type="number" value={countryId ?? ''} onChange={(e) => setCountryId(e.target.value ? Number(e.target.value) : null)} />
-                      <input className="form-control form-control-sm mr-1" placeholder="Eyalet ID" type="number" value={stateId ?? ''} onChange={(e) => setStateId(e.target.value ? Number(e.target.value) : null)} />
-                      <input className="form-control form-control-sm" placeholder="Şehir ID" type="number" value={cityId ?? ''} onChange={(e) => setCityId(e.target.value ? Number(e.target.value) : null)} />
-                    </div>
+                <div className="col-md-4 mb-2">
+                  <label className="small text-muted d-block">Konum</label>
+                  <div className="d-flex">
+                    <select
+                      className="form-control form-control-sm mr-1"
+                      value={countryId ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value ? Number(e.target.value) : null;
+                        setCountryId(val);
+                        setStateId(null);
+                        setCityId(null);
+                      }}
+                    >
+                      <option value="">Ülke</option>
+                      {countriesData?.data?.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="form-control form-control-sm mr-1"
+                      value={stateId ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value ? Number(e.target.value) : null;
+                        setStateId(val);
+                        setCityId(null);
+                      }}
+                      disabled={!countryId || loadingStates}
+                    >
+                      <option value="">Eyalet</option>
+                      {statesData?.data?.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="form-control form-control-sm"
+                      value={cityId ?? ''}
+                      onChange={(e) => setCityId(e.target.value ? Number(e.target.value) : null)}
+                      disabled={!stateId || loadingCities}
+                    >
+                      <option value="">Şehir</option>
+                      {citiesData?.data?.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
+                </div>
                   <div className="col-md-3 mb-2">
                     <label className="small text-muted">Yaş Aralığı</label>
                     <div className="d-flex">
@@ -166,10 +212,20 @@ const PeopleList = () => {
                       <input className="form-control form-control-sm" placeholder="Max" type="number" value={ageMax ?? ''} onChange={(e) => setAgeMax(e.target.value ? Number(e.target.value) : null)} />
                     </div>
                   </div>
-                  <div className="col-md-2 mb-2">
-                    <label className="small text-muted">Para Birimi</label>
-                    <input className="form-control form-control-sm" placeholder="ID" type="number" value={currencyId ?? ''} onChange={(e) => setCurrencyId(e.target.value ? Number(e.target.value) : null)} />
-                  </div>
+                <div className="col-md-2 mb-2">
+                  <label className="small text-muted">Para Birimi</label>
+                  <select
+                    className="form-control form-control-sm"
+                    value={currencyId ?? ''}
+                    onChange={(e) => setCurrencyId(e.target.value ? Number(e.target.value) : null)}
+                    disabled={loadingCurrencies}
+                  >
+                    <option value="">Seçiniz</option>
+                    {currenciesData?.data?.map((cur) => (
+                      <option key={cur.id} value={cur.id}>{cur.code} - {cur.name}</option>
+                    ))}
+                  </select>
+                </div>
                   <div className="col-md-3 mb-2">
                     <label className="small text-muted">Sırala</label>
                     <select className="form-control form-control-sm" value={sort ?? ''} onChange={(e) => setSort((e.target.value || null) as any)}>

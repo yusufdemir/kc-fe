@@ -49,6 +49,20 @@ const PeopleDetail = () => {
                     <th>TC</th>
                     <td>{p.citizenship_no}</td>
                   </tr>
+                  <tr>
+                    <th>Konum</th>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <span className="mr-2">{p.country?.name || '-'}</span>
+                        {p.state?.name && <span className="text-muted mr-2">/ {p.state.name}</span>}
+                        {p.city?.name && <span className="text-muted">/ {p.city.name}</span>}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Para Birimi</th>
+                    <td>{p.currency ? `${p.currency.code} - ${p.currency.name}` : '-'}</td>
+                  </tr>
                 </tbody>
               </table>
             )}
