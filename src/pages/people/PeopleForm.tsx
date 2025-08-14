@@ -7,6 +7,7 @@ import type { PersonStoreRequest, PersonUpdateRequest } from '@app/types/people'
 import { toast } from 'react-toastify';
 import ContentHeader from '@app/components/content-header/ContentHeader';
 import { useGetCountriesQuery, useGetStatesQuery, useGetCitiesQuery, useGetCurrenciesQuery } from '@app/store/services/worldApi';
+import { useAppSelector } from '@app/store/store';
 
 const schema = Yup.object({
   first_name: Yup.string().required('Gerekli'),
@@ -25,6 +26,12 @@ const PeopleForm = () => {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const personId = Number(id);
+
+  const user = useAppSelector((s) => s.auth.user);
+  const canCreate = (user?.permissions || []).includes('person.create');
+  const canUpdate = (user?.permissions || []).includes('person.update');
+  const canSubmit = isEdit ? canUpdate : canCreate;
+
   const { data } = useGetPersonQuery(personId, { skip: !isEdit });
   const [createPerson, { isLoading: creating }] = useCreatePersonMutation();
   const [updatePerson, { isLoading: updating }] = useUpdatePersonMutation();
@@ -104,26 +111,26 @@ const PeopleForm = () => {
               <div className="row">
                 <div className="form-group col-md-6">
                   <label>Ad</label>
-                  <input name="first_name" className="form-control" value={values.first_name as any} onChange={handleChange} />
+                  <input name="first_name" className="form-control" value={values.first_name as any} onChange={handleChange} disabled={!canSubmit} />
                   {touched.first_name && errors.first_name && <div className="text-danger">{errors.first_name as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
                   <label>Soyad</label>
-                  <input name="last_name" className="form-control" value={values.last_name as any} onChange={handleChange} />
+                  <input name="last_name" className="form-control" value={values.last_name as any} onChange={handleChange} disabled={!canSubmit} />
                   {touched.last_name && errors.last_name && <div className="text-danger">{errors.last_name as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
                   <label>Email</label>
-                  <input name="email" type="email" className="form-control" value={values.email as any} onChange={handleChange} />
+                  <input name="email" type="email" className="form-control" value={values.email as any} onChange={handleChange} disabled={!canSubmit} />
                   {touched.email && errors.email && <div className="text-danger">{errors.email as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
                   <label>Yaş</label>
-                  <input name="age" type="number" className="form-control" value={(values.age as any) ?? ''} onChange={handleChange} />
+                  <input name="age" type="number" className="form-control" value={(values.age as any) ?? ''} onChange={handleChange} disabled={!canSubmit} />
                 </div>
                 <div className="form-group col-md-6">
                   <label>TC</label>
-                  <input name="citizenship_no" className="form-control" value={values.citizenship_no as any} onChange={handleChange} />
+                  <input name="citizenship_no" className="form-control" value={values.citizenship_no as any} onChange={handleChange} disabled={!canSubmit} />
                   {touched.citizenship_no && errors.citizenship_no && <div className="text-danger">{errors.citizenship_no as any}</div>}
                 </div>
                 <div className="form-group col-md-6">
@@ -139,6 +146,7 @@ const PeopleForm = () => {
                       setFieldValue('city_id', null);
                       setFieldValue('currency_id', null);
                     }}
+                    disabled={!canSubmit}
                   >
                     <option value={0}>Seçiniz</option>
                     {countriesData?.data?.map((c) => (
@@ -158,7 +166,7 @@ const PeopleForm = () => {
                       setFieldValue('state_id', n);
                       setFieldValue('city_id', null);
                     }}
-                    disabled={!values.country_id || loadingStates}
+                    disabled={!values.country_id || loadingStates || !canSubmit}
                   >
                     <option value="">Seçiniz</option>
                     {statesData?.data?.map((s) => (
@@ -173,7 +181,7 @@ const PeopleForm = () => {
                     className="form-control"
                     value={(values.city_id as any) ?? ''}
                     onChange={(e) => setFieldValue('city_id', e.target.value ? Number(e.target.value) : null)}
-                    disabled={!values.state_id || loadingCities}
+                    disabled={!values.state_id || loadingCities || !canSubmit}
                   >
                     <option value="">Seçiniz</option>
                     {citiesData?.data?.map((c) => (
@@ -188,7 +196,7 @@ const PeopleForm = () => {
                     className="form-control"
                     value={(values.currency_id as any) ?? ''}
                     onChange={(e) => setFieldValue('currency_id', e.target.value ? Number(e.target.value) : null)}
-                    disabled={loadingCurrencies}
+                    disabled={loadingCurrencies || !canSubmit}
                   >
                     <option value="">Seçiniz</option>
                     {currenciesData?.data?.map((cur) => (
@@ -197,7 +205,12 @@ const PeopleForm = () => {
                   </select>
                 </div>
               </div>
-              <button className="btn btn-primary" type="submit" disabled={creating || updating}>
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={creating || updating || !canSubmit}
+                title={!canSubmit ? 'Yetkiniz yok' : (isEdit ? 'Değişiklikleri Güncelle' : 'Yeni Kişi Kaydet')}
+              >
                 {isEdit ? 'Güncelle' : 'Kaydet'}
               </button>
             </form>

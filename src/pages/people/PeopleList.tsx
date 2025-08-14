@@ -6,8 +6,13 @@ import { toast } from 'react-toastify';
 import ContentHeader from '@app/components/content-header/ContentHeader';
 import { OverlayLoading } from '@app/components/OverlayLoading';
 import { useGetCountriesQuery, useGetStatesQuery, useGetCitiesQuery, useGetCurrenciesQuery } from '@app/store/services/worldApi';
+import { useAppSelector } from '@app/store/store';
 
 const PeopleList = () => {
+  const user = useAppSelector((s) => s.auth.user);
+  const canCreate = (user?.permissions || []).includes('person.create');
+  const canUpdate = (user?.permissions || []).includes('person.update');
+  const canDelete = (user?.permissions || []).includes('person.delete');
   // q devre dışı
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -135,7 +140,12 @@ const PeopleList = () => {
                     <option value={50}>50</option>
                   </select>
                 </div>
-                <button className="btn btn-primary" onClick={() => navigate('/people/new')}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/people/new')}
+                  disabled={!canCreate}
+                  title={!canCreate ? 'Yetkiniz yok' : 'Yeni Kişi Ekle'}
+                >
                   <i className="fa fa-user-plus mr-2" /> Yeni Kişi
                 </button>
               </div>
@@ -338,10 +348,19 @@ const PeopleList = () => {
                           <Link to={`/people/${p.id}`} className="btn btn-default" title="Detay">
                             <i className="fa fa-eye" />
                           </Link>
-                          <Link to={`/people/${p.id}/edit`} className="btn btn-info" title="Düzenle">
+                          <Link
+                            to={`/people/${p.id}/edit`}
+                            className={`btn btn-info ${!canUpdate ? 'disabled' : ''}`}
+                            title={!canUpdate ? 'Yetkiniz yok' : 'Düzenle'}
+                          >
                             <i className="fa fa-edit" />
                           </Link>
-                          <button className="btn btn-danger" title="Sil" disabled={deleting} onClick={() => onDelete(p.id)}>
+                          <button
+                            className="btn btn-danger"
+                            title={!canDelete ? 'Yetkiniz yok' : 'Sil'}
+                            disabled={deleting || !canDelete}
+                            onClick={() => onDelete(p.id)}
+                          >
                             <i className="fa fa-trash" />
                           </button>
                         </div>
