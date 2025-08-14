@@ -1,7 +1,27 @@
 import { api } from '@app/store/services/api';
 import type { PeopleQueryParams, PersonResource, PersonStoreRequest, PersonUpdateRequest } from '@app/types/people';
 
-type ListResponse = { data: PersonResource[] };
+type PaginationLinks = {
+  first: string | null;
+  last: string | null;
+  prev: string | null;
+  next: string | null;
+};
+
+type MetaLinksItem = { url: string | null; label: string; page: number | null; active: boolean };
+
+type PaginationMeta = {
+  current_page: number;
+  from: number | null;
+  last_page: number;
+  links: MetaLinksItem[];
+  path: string;
+  per_page: number;
+  to: number | null;
+  total: number;
+};
+
+type ListResponse = { data: PersonResource[]; links?: PaginationLinks; meta?: PaginationMeta };
 type ItemResponse = { data: PersonResource };
 
 const buildQueryString = (p: PeopleQueryParams = {}) => {
@@ -28,6 +48,7 @@ export const peopleApi = api.injectEndpoints({
   endpoints: (build) => ({
     getPeople: build.query<ListResponse, PeopleQueryParams | void>({
       query: (params) => ({ url: `/v1/people${buildQueryString(params || {})}`, method: 'get' }),
+      // Listeler için otomatik refetch ayarları endpoint kullanımında override edilecek
       providesTags: (result) =>
         result?.data
           ? [

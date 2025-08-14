@@ -38,7 +38,12 @@ const App = () => {
   const location = useLocation();
 
   const [isAppLoading, setIsAppLoading] = useState(false);
-  const { error: meError } = useMeQuery(undefined, { skip: false });
+  const { error: meError } = useMeQuery(undefined, {
+    skip: !localStorage.getItem(import.meta.env.VITE_TOKEN_STORAGE_KEY || 'access_token'),
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false,
+  });
   useEffect(() => {
     if (meError) {
       toast.info('login.messages.sessionInvalid');

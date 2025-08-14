@@ -55,7 +55,7 @@ export interface PeopleQueryParams {
   currency_id?: number | null;
   age_min?: number | null;
   age_max?: number | null;
-  sort?: 'id' | 'created_at' | '-created_at' | 'last_name' | '-last_name' | 'age' | '-age' | null;
+  sort?: 'id' | '-id' | 'created_at' | '-created_at' | 'last_name' | '-last_name' | 'age' | '-age' | null;
   per_page?: number | null;
   page?: number | null;
 }

@@ -62,7 +62,8 @@ apiClient.interceptors.response.use(
 
     const url = originalRequest?.url || '';
     const isAuthPath = url.includes('/v1/auth/login') || url.includes('/v1/auth/refresh') || url.includes('/v1/auth/logout');
-    if (status === 401 && originalRequest && !originalRequest._retry && !isAuthPath) {
+    const hasToken = Boolean(getStoredAccessToken());
+    if (status === 401 && originalRequest && !originalRequest._retry && !isAuthPath && hasToken) {
       originalRequest._retry = true;
 
       if (isRefreshing) {

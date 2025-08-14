@@ -36,8 +36,8 @@ const { VITE_API_BASE_URL } = import.meta.env as { VITE_API_BASE_URL?: string };
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery({ baseUrl: VITE_API_BASE_URL || '/api' }),
-  refetchOnFocus: true,
-  refetchOnReconnect: true,
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   tagTypes: ['People', 'Person', 'Auth', 'User'],
   endpoints: () => ({}),
 });
